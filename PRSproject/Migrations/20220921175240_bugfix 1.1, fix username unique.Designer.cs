@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PRSproject.Models;
 
@@ -10,9 +11,10 @@ using PRSproject.Models;
 namespace PRSproject.Migrations
 {
     [DbContext(typeof(PRSDbContext))]
-    partial class PRSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220921175240_bugfix 1.1, fix username unique")]
+    partial class bugfix11fixusernameunique
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

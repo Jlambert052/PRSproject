@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PRSproject.Models {
 
-    [Index("Password", IsUnique = true, Name = "PasswordIndex")]
+    [Index("Username", IsUnique = true, Name = "UsernameIndex")]
     public class User {
 
         [Key]

@@ -32,11 +32,7 @@ namespace PRSproject.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<RequestLine>> GetRequestLine(int id)
         {
-            var requestLine = await _context.RequestLines
-                                                        .Include(x => x.Request)
-                                                        .ThenInclude(x => x.User)
-                                                        .Include(x => x.Product)
-                                                        .SingleOrDefaultAsync(x => x.Id == id);
+            var requestLine = await _context.RequestLines.SingleOrDefaultAsync(x => x.Id == id);
 
             if (requestLine == null)
             {
@@ -62,7 +58,9 @@ namespace PRSproject.Controllers
             {
                 await _context.SaveChangesAsync();
             }
+
             catch (DbUpdateConcurrencyException)
+
             {
                 if (!RequestLineExists(id))
                 {
@@ -73,17 +71,36 @@ namespace PRSproject.Controllers
                     throw;
                 }
             }
-
+            await RecalculateRequestTotal(requestLine.RequestId);
             return NoContent();
         }
-
         //PRIVATE; built into functions; not called independently.
         //Recalculate the request.total property whenever an insert,update,or delete function occurs to the RL attached.
-        private async Task<IActionResult> RecalculateTotal(int id, RequestLine requestLine) {
-            int total = from rl in _context.RequestLines
-                        join 
-        }
+        private async Task<IActionResult> RecalculateRequestTotal(int requestid) {
+            //read the request attached to the id
+            var request = await _context.Requests.FindAsync(requestid);
+            //if the request does not exist, return error
+            if (request == null) {
+                throw new Exception (
+                   "Invalid requestId; try new id or check requests"
+                );
+            }
 
+            //calculate and update the total across the tables
+            request.Total = (from rl in _context.RequestLines
+                                join p in _context.Products
+                             on rl.ProductId equals p.Id
+                         where requestid == rl.RequestId
+                         select new {
+                             ProdTotal = p.Price * rl.Quantity                             
+                         }).Sum(x => x.ProdTotal); 
+
+
+            await _context.SaveChangesAsync();
+
+            return NoContent(); 
+        }
+        
         // POST: api/RequestLines
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -91,7 +108,7 @@ namespace PRSproject.Controllers
         {
             _context.RequestLines.Add(requestLine);
             await _context.SaveChangesAsync();
-
+            await RecalculateRequestTotal(requestLine.RequestId);
             return CreatedAtAction("GetRequestLine", new { id = requestLine.Id }, requestLine);
         }
 
@@ -107,9 +124,11 @@ namespace PRSproject.Controllers
 
             _context.RequestLines.Remove(requestLine);
             await _context.SaveChangesAsync();
+            await RecalculateRequestTotal(requestLine.RequestId);
 
             return NoContent();
         }
+
 
         private bool RequestLineExists(int id)
         {

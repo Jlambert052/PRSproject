@@ -33,14 +33,20 @@ namespace PRSproject.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Request>>> GetRequests()
         {
-            return await _context.Requests.ToListAsync();
+            return await _context.Requests
+                                        .Include(x => x.User)
+                                        .ToListAsync();
         }
 
         // GET: api/Requests/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Request>> GetRequest(int id)
         {
-            var request = await _context.Requests.FindAsync(id);
+            var request = await _context.Requests
+                                                .Include(x => x.RequestLines)!
+                                                .ThenInclude(x => x.Product)
+                                                .Include(x=> x.User)
+                                                .SingleOrDefaultAsync(x=> x.Id == id);
 
             if (request == null)
             {
@@ -93,41 +99,29 @@ namespace PRSproject.Controllers
         //PUT: api/requests/review/{requestId}
         [HttpPut("review/{id}")]
         public async Task<IActionResult> PutStatusRequest(int id, Request request) {
-            if (id != request.Id)
-                return BadRequest();
-            _context.Entry(request).State = EntityState.Modified; //updates the entity
 
             request.Status = (request.Total >= 50) ? REVIEW : APPROVED; //change made to the property otherwise
 
-            await _context.SaveChangesAsync();
-            return NoContent();
+            return await PutRequest(id, request);
         }
 
         //PUT: api/requests/approve/{requestId}
         [HttpPut("approve/{id}")]
         public async Task<IActionResult> PutStatusApproved(int id, Request request) {
-            if (id != request.Id)
-                return BadRequest();
 
             request.Status = APPROVED;
 
-            _context.Entry(request).State= EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+            return await PutRequest(id, request);
 
-        //PUT: api/requests/reject/{requestId}
-        [HttpPut("reject/{id}")]
+        }
+            //PUT: api/requests/reject/{requestId}
+            [HttpPut("reject/{id}")]
         public async Task<IActionResult> PutStatusRejected(int id, Request request) {
-            if (id != request.Id)
-                return BadRequest();
+
             request.Status = REJECTED;
 
-            _context.Entry(request).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
+            return await PutRequest(id, request);
         }
-
 
         // POST: api/Requests
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

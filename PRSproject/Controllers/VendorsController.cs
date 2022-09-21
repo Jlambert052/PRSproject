@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PRSproject.Migrations;
 using PRSproject.Models;
 
 namespace PRSproject.Controllers
@@ -39,6 +40,24 @@ namespace PRSproject.Controllers
             }
 
             return vendor;
+        }
+
+        // GET: api/po/{vendorId}
+        [HttpGet("po/{vendorId}")]
+        public async Task<ActionResult<Po>> CreatePo(int vendorId) {
+            Po po = new();
+
+            po.Vendor = await _context.Vendors.FindAsync(vendorId);
+            
+            if(po.Vendor == null) {
+                throw new Exception(
+                "VendorId did not match."
+                );
+            }
+            var Poline = 
+
+            
+            
         }
 
         // PUT: api/Vendors/5
