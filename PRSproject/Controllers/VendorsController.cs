@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -41,12 +42,12 @@ namespace PRSproject.Controllers
 
             return vendor;
         }
-
+        
         // GET: api/po/{vendorId}
         [HttpGet("po/{vendorId}")]
         public async Task<ActionResult<Po>> CreatePo(int vendorId) {
             Po po = new();
-
+            // instance po, then assign vendorId from the passthrough for the method
             po.Vendor = await _context.Vendors.FindAsync(vendorId);
             
             if(po.Vendor == null) {
@@ -54,11 +55,41 @@ namespace PRSproject.Controllers
                 "VendorId did not match."
                 );
             }
-            var Poline = 
-
+            var poline = from v in _context.Vendors
+                         join p in _context.Products
+                            on v.Id equals p.VendorId
+                         join rl in _context.RequestLines
+                            on p.Id equals rl.ProductId
+                         join r in _context.Requests
+                            on rl.RequestId equals r.Id
+                         where r.Status == "APPROVED"
+                         select new {
+                             p.Id,
+                             Product = p.Name,
+                             rl.Quantity,
+                             p.Price,
+                             LineTotal = p.Price * rl.Quantity
+                         };
+            var sortedLines = new SortedList<int, Poline>();
+            foreach (var line in poline) {
+                if (!sortedLines.ContainsKey(line.Id)) {
+                    var pol = new Poline() {
+                        Product = line.Product,
+                        Quantity = 0,
+                        Price = line.Price,
+                        LineTotal = line.LineTotal
+                    };
+                    sortedLines.Add(line.Id, pol);
+                }
+                sortedLines[line.Id].Quantity += line.Quantity;
             
-            
+            }
+            //takes the data from sortedLines, specifies just the value column (ignores the key column) and adds up for each linetotal.
+            po.PoTotal = sortedLines.Values.Sum(sl => sl.LineTotal);
+            po.Polines = sortedLines.Values;
+            return po;
         }
+            
 
         // PUT: api/Vendors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

@@ -28,6 +28,6 @@ namespace PRSproject.Models {
         public int UserId { get; set; }
         public virtual User? User { get; set; } //references user as a FK
 
-        public virtual IEnumerable<RequestLine>? RequestLines { get; set; } = Enumerable.Empty<RequestLine>();
+        public virtual IEnumerable<RequestLine>? RequestLines { get; set; }
     }
 }
