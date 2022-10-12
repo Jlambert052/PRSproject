@@ -63,6 +63,7 @@ namespace PRSproject.Controllers
                          join r in _context.Requests
                             on rl.RequestId equals r.Id
                          where r.Status == "APPROVED"
+                         where v.Id == vendorId
                          select new {
                              p.Id,
                              Product = p.Name,
@@ -80,6 +81,7 @@ namespace PRSproject.Controllers
                         LineTotal = line.LineTotal
                     };
                     sortedLines.Add(line.Id, pol);
+                    
                 }
                 sortedLines[line.Id].Quantity += line.Quantity;
             

@@ -13,7 +13,7 @@ builder.Services.AddDbContext<PRSDbContext>(x => {
     x.UseSqlServer(builder.Configuration.GetConnectionString(ConnectionKey));
 });
 
-
+    
 builder.Services.AddCors();
 
 var app = builder.Build();
