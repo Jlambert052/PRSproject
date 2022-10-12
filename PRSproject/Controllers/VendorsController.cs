@@ -21,14 +21,12 @@ namespace PRSproject.Controllers
         {
             _context = context;
         }
-
         // GET: api/Vendors
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vendor>>> GetVendors()
         {
             return await _context.Vendors.ToListAsync();
         }
-
         // GET: api/Vendors/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Vendor>> GetVendor(int id)
@@ -39,10 +37,8 @@ namespace PRSproject.Controllers
             {
                 return NotFound();
             }
-
             return vendor;
         }
-        
         // GET: api/po/{vendorId}
         [HttpGet("po/{vendorId}")]
         public async Task<ActionResult<Po>> CreatePo(int vendorId) {
@@ -81,17 +77,14 @@ namespace PRSproject.Controllers
                         LineTotal = line.LineTotal
                     };
                     sortedLines.Add(line.Id, pol);
-                    
                 }
                 sortedLines[line.Id].Quantity += line.Quantity;
-            
             }
             //takes the data from sortedLines, specifies just the value column (ignores the key column) and adds up for each linetotal.
             po.PoTotal = sortedLines.Values.Sum(sl => sl.LineTotal);
             po.Polines = sortedLines.Values;
             return po;
         }
-            
 
         // PUT: api/Vendors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -102,7 +95,6 @@ namespace PRSproject.Controllers
             {
                 return BadRequest();
             }
-
             _context.Entry(vendor).State = EntityState.Modified;
 
             try
@@ -120,10 +112,8 @@ namespace PRSproject.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
-
         // POST: api/Vendors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -134,7 +124,6 @@ namespace PRSproject.Controllers
 
             return CreatedAtAction("GetVendor", new { id = vendor.Id }, vendor);
         }
-
         // DELETE: api/Vendors/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVendor(int id)
@@ -144,13 +133,11 @@ namespace PRSproject.Controllers
             {
                 return NotFound();
             }
-
             _context.Vendors.Remove(vendor);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
-
         private bool VendorExists(int id)
         {
             return _context.Vendors.Any(e => e.Id == id);
