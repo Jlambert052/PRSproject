@@ -4,11 +4,14 @@ using PRSproject.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+var ConnectionKey = "Live";
+#if DEBUG
+    ConnectionKey = "Prod"; 
+#endif
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<PRSDbContext>(x => {
-    string ConnectionKey = "Prod";
+    
 
     x.UseSqlServer(builder.Configuration.GetConnectionString(ConnectionKey));
 });
